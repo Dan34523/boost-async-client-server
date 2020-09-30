@@ -81,6 +81,23 @@ void sendThread(tcp::socket& sock, boost::system::error_code& ec, string const& 
 	}
 }
 
+void InputThread() {
+	while (!terminateProgram) {
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		string clientInput;
+		getline(cin, clientInput);
+
+		mu.lock();
+		dataStruct inp;
+		inp.data = clientInput;
+		inp.ready = true;
+		clientSendQueue.push(inp);
+		mu.unlock();
+
+	}
+}
+
 int main() {
 	return 0;
 }
