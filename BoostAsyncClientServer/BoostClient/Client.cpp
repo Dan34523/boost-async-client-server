@@ -65,7 +65,7 @@ void sendThread(tcp::socket& sock, boost::system::error_code& ec, string const& 
 			if (front.ready) {
 
 				write(sock, buffer(username + " " + front.data), ec);
-				
+
 				if (!ec) {
 					clientSendQueue.pop();
 				}
@@ -73,11 +73,8 @@ void sendThread(tcp::socket& sock, boost::system::error_code& ec, string const& 
 				else {
 					cout << "Send failed. Error Message: " << ec.message() << endl;
 				}
-
 			}
-
 		}
-
 	}
 }
 
@@ -94,7 +91,6 @@ void inputThread() {
 		inp.ready = true;
 		clientSendQueue.push(inp);
 		mu.unlock();
-
 	}
 }
 
@@ -110,12 +106,64 @@ void outputThread() {
 				cout << "<Server> " + front.data.substr(3, -1) << endl;
 				clientRecvQueue.pop();
 			}
-
 		}
-
 	}
 }
 
+void getConnectionInfo(string& ip, string& port, string& username) {
+	cout << "Enter Server IP address. \n> ";
+	getline(cin, ip);
+
+	if (ip == "localhost") ip = "127.0.0.1";
+
+	cout << "\nEnter Server Port.\n> ";
+	getline(cin, port);
+
+	cout << "\nEnter your username. This will be displayed to other users when you join\n> ";
+	getline(cin, username);
+}
+
 int main() {
-	return 0;
+	string ip_address, port, username;
+	io_service ioservice;
+	tcp::socket socket(ioservice);
+
+	getConnectionInfo(ip_address, port, username);
+	bool inputIsValid = false;
+
+	while (!inputIsValid) {
+
+		// Assume the user has entered valid details
+		inputIsValid = true;
+
+		try {
+			socket.connect(tcp::endpoint(ip::address::from_string(ip_address), std::stoi(port)));
+		}
+		catch (...) {
+			cout << "\nInvalid connection data. Please enter details again\n" << endl;
+			inputIsValid = false;
+			getConnectionInfo(ip_address, port, username);
+		}
+	}
+
+	streambuf receiveBuffer;
+	boost::system::error_code error;
+
+	write(socket, buffer(username + " clientconnect"), error);
+
+	std::thread serverSendThread([&] {sendThread(socket, error, username); });
+	std::thread serverRecvThread([&] {recvThread(socket, receiveBuffer, error, username); });
+	std::thread userInputThread(inputThread);
+	std::thread userOutputThread(outputThread);
+
+	serverRecvThread.join();
+
+	serverSendThread.detach();
+	userInputThread.detach();
+	userOutputThread.detach();
+
+	socket.close();
+
+	Sleep(2500);
+
 }
