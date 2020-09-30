@@ -34,3 +34,10 @@
 \.vs/
 *.VC.db
 *.suo
+*.recipe
+*.log
+*.lastbuildstate
+*.tlog
+*.idb
+*.pdb
+*.ilk

@@ -80,3 +80,7 @@ void sendThread(tcp::socket& sock, boost::system::error_code& ec, string const& 
 
 	}
 }
+
+int main() {
+	return 0;
+}
