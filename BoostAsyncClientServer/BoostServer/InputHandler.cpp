@@ -1,0 +1,57 @@
+#include "InputHandler.h"
+
+const string permittedCommands[] = { "configure", "monitor", "resetall", "disconnect", "help", "clientconnect" };
+const string permittedParameters[] = { "param1", "param2", "parameterChanges" };
+
+// Takes the first word of the command and checks against array
+bool commandIsValid(string const& command) {
+	for (auto element : permittedCommands) {
+		if (command == element || command.substr(0, command.find(" ")) == element) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// Splits the string into whitespace separated substrings i.e. separate words
+vector<string> parseCommand(string const& command) {
+	vector<string> result;
+	string currentWord = "";
+	const int commandLength = static_cast<int>(command.length());
+
+	for (int index = 0; index < commandLength; ++index) {
+		char currentLetter = command[index];
+		if (currentLetter == ' ') {
+			result.push_back(currentWord);
+			currentWord = "";
+		}
+		else {
+			currentWord += currentLetter;
+		}
+	}
+
+	result.push_back(currentWord);
+	return result;
+}
+
+/*	Returns the message that will be sent to the client. First 3 characters of
+	return value are metadata indicating type of response:
+		- 000 = Broadcast to all connected clients
+		- 001 = Reply to client who sent the message
+		- 002 = Broadcast disconnect message to all clients
+*/
+string processCommand(string const& command, string const& clientName) {
+	if (!commandIsValid(command)) {
+		return "001ERROR: " + command + " is not defined. Use help for a list of valid commands";
+	}
+
+	if (command.substr(0, command.find(" ")) == "clientconnect") {
+		return "000" + clientName + " has joined the server.";
+	}
+
+	else if (command.substr(0, command.find(" ")) == "configure") {
+		/*	Passed a substring to this function. Removed "configure " from the string as we already know that
+			the first word. Passing a full string */
+	}
+}
