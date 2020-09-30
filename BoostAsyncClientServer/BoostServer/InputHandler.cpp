@@ -52,6 +52,14 @@ string processCommand(string const& command, string const& clientName) {
 
 	else if (command.substr(0, command.find(" ")) == "configure") {
 		/*	Passed a substring to this function. Removed "configure " from the string as we already know that
-			the first word. Passing a full string */
+			the first word. Passing a full string would require another 10 executions of the for loop.
+			Could perhaps parse before this if block, but may be a waste of time for single word commands.
+			Performance with boths methods needs to be tested */
+		const vector<string> parsedCommand = parseCommand(command.substr(10, -1));
+
+		if (parsedCommand.capacity() < 2) {
+			return "001ERROR: Configure unsuccesful - configure takes 2 arguments, only " + 
+				to_string(parsedCommand.capacity()) + " provided";
+		}
 	}
 }
