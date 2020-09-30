@@ -81,7 +81,7 @@ void sendThread(tcp::socket& sock, boost::system::error_code& ec, string const& 
 	}
 }
 
-void InputThread() {
+void inputThread() {
 	while (!terminateProgram) {
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -94,6 +94,24 @@ void InputThread() {
 		inp.ready = true;
 		clientSendQueue.push(inp);
 		mu.unlock();
+
+	}
+}
+
+void outputThread() {
+	while (true) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+		while (!clientRecvQueue.empty()) {
+
+			const dataStruct front = clientRecvQueue.front();
+
+			if (front.ready) {
+				cout << "<Server> " + front.data.substr(3, -1) << endl;
+				clientRecvQueue.pop();
+			}
+
+		}
 
 	}
 }
