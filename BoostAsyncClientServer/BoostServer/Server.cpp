@@ -43,7 +43,7 @@ private:
 						do_write(serverResponse.size(), serverResponse.c_str());
 					}
 					else if (sendType == "000" || sendType == "002") {
-						broadcast_to_all();
+						broadcast_to_all(serverResponse);
 					}
 				}
 			}
@@ -51,11 +51,20 @@ private:
 	}
 
 	void do_write(std::size_t length, const char* reply) {
-
+		auto self(shared_from_this());
+		async_write(socket_, buffer(reply, length), 
+			[this, self](boost::system::error_code ec, size_t /*length*/)
+			{
+				if (!ec) {
+					do_read();
+				}
+			});
 	}
 
 	void broadcast_to_all(string const& message) {
-
+		for (size_t i = 0; i < sessionList.size(); ++i) {
+			sessionList[i]->do_write(message.length(), message.c_str());
+		}
 	}
 
 	tcp::socket socket_;
@@ -65,6 +74,31 @@ private:
 };
 
 vector<session*> session::sessionList;
+
+class server
+{
+public:
+	server(io_context& io_context, short port) : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)){
+
+	}
+
+private:
+
+	void do_accept() {
+		acceptor_.async_accept(
+			[this](boost::system::error_code ec, tcp::socket socket)
+			{
+				if (!ec) {
+					std::make_shared<session>(std::move(socket))->start();
+				}
+
+				do_accept();
+			}
+		);
+	}
+
+	tcp::acceptor acceptor_;
+};
 
 int main() {
 	return 0;

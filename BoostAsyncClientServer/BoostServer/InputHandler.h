@@ -20,3 +20,11 @@ using std::vector;
 extern string param1;
 extern string param2;
 extern int parameterChanges;
+
+void saveParams();
+bool changeParam(const string& param, const string& value, const bool forceChange);
+string getParam(const string& param);
+void resetParam();
+string processCommand(string const& command, string const& clientName);
+void initialiseParams();
+vector<string> parseCommand(string const& command);

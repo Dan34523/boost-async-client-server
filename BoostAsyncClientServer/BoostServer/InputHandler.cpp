@@ -61,5 +61,22 @@ string processCommand(string const& command, string const& clientName) {
 			return "001ERROR: Configure unsuccesful - configure takes 2 arguments, only " + 
 				to_string(parsedCommand.capacity()) + " provided";
 		}
+
+		// Send the data to VirtualEquipment.cpp to change the parameter. Returns whether change happened
+		bool successful = changeParam(parsedCommand[0], parsedCommand[1], false);
+
+		if (successful) {
+			return "000" + clientName + " changed " + parsedCommand[0] + " to " + parsedCommand[1];
+		}
+		else {
+			return "001Change was not committed. Unchangeable parameter";
+		}
+	}
+
+	else if (command.substr(0, command.find(" ")) == "monitor") {
+		/*	Don't need to parse this command as we know there is only one argument for this function.
+			Just pass in the final word to the getParam function */
+		string value = getParam(command.substr(8, -1));
+		return "001" + value;
 	}
 }
