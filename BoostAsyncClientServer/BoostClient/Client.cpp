@@ -166,4 +166,5 @@ int main() {
 
 	Sleep(2500);
 
+	return 0;
 }

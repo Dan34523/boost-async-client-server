@@ -36,7 +36,7 @@ private:
 					const string clientName = clientInput.substr(0, clientInput.find(" "));
 					const string clientCommand = clientInput.substr(clientInput.find(" ") + 1, -1);
 
-					const string serverResponse; // TODO : Assign processCommand()
+					const string serverResponse = processCommand(clientCommand, clientName);
 					const string sendType = serverResponse.substr(0, 3);
 
 					if (sendType == "001") {
@@ -79,7 +79,7 @@ class server
 {
 public:
 	server(io_context& io_context, short port) : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)){
-
+		do_accept();
 	}
 
 private:
@@ -101,5 +101,17 @@ private:
 };
 
 int main() {
+
+	initialiseParams();
+
+	try {
+		io_context io_context;
+		server s(io_context, 47000);
+		io_context.run();
+	}
+	catch (std::exception& e) {
+		cerr << "Exception: " << e.what() << "\n";
+	}
+
 	return 0;
 }

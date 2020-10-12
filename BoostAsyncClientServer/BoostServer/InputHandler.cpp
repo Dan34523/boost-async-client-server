@@ -79,4 +79,40 @@ string processCommand(string const& command, string const& clientName) {
 		string value = getParam(command.substr(8, -1));
 		return "001" + value;
 	}
+
+	else if (command == "resetall") {
+		resetParam();
+		return "000" + clientName + " has reset all parameters";
+	}
+
+	else if (command == "disconnect") {
+		saveParams();
+		
+		return "002" + clientName + " has left the server";
+		// Actual disconnection code will execute client side
+	}
+
+	else if (command == "help") {
+		// Doesn't involve parameters, so won't call a function from VirtualEquipment.cpp
+
+		// Nicely formatted list of available commands for the user
+		string returnValue = "001\nList of recognised commands: ";
+		for (auto element : permittedCommands) {
+			// clientconnect isn't an available command for the client, so won't include it
+			if (element == "clientconnect") break;
+
+			returnValue += "\n    - " + element;
+			
+			// Adds arguments to relevant commands
+			if (element == "configure") returnValue += " <parameter> <value>";
+			else if (element == "monitor") returnValue += " <parameter>";
+		}
+		return returnValue;
+	}
+
+	/*	Should never get to this point. commandIsValid() would've picked up if the command
+		isn't recognised. This is just here to appease the warnings I was getting for all
+		paths not returning a value */
+
+	return "No response generated";
 }
